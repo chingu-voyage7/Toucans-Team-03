@@ -1,0 +1,48 @@
+ {% extends "layout.html" %}
+{% block content %}
+    <div class="split right">
+    <h3 style='color: red;font-size: 30px;'>No message yet..</h3>
+    <div class="message_holder"></div>
+
+    <form id="footer" action="" method="POST">
+      <input type="hidden" class="username" style='color: red' value="{{ saves.get('name', '') }}" placeholder="User Name"/>
+      <input id="chatbox" autocomplete="off" type="text" class="message" style='color: red' placeholder="Messages"/>
+    </form>
+    </div>
+    <div class="split left">
+      <ul id="navigation">
+        <li>{{ saves.get('name', '') }}</li>
+    </ul>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script type="text/javascript">
+
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on( 'connect', function() {
+        socket.emit( 'my event', {
+          data: 'User Connected'
+        })
+        var form = $( 'form' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let user_name = $( 'input.username' ).val()
+          let user_input = $( 'input.message' ).val()
+          socket.emit( 'my event', {
+            user_name : user_name,
+            message : user_input
+          } )
+          $( 'input.message' ).val( '' ).focus()
+        } )
+      } )
+      socket.on( 'my response', function( msg ) {
+        console.log( msg )
+        if( typeof msg.user_name !== 'undefined' ) {
+          $( 'h3' ).remove()
+          $( 'div.message_holder' ).append( '<div><b style="color: red">'+msg.user_name+': </b> '+'<b style="color: red">'+msg.message+'</b>  '+'</div>' )
+        }
+      })
+    </script>
+
+
+{% endblock %}
